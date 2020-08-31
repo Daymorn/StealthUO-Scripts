@@ -7,7 +7,6 @@ Confidence = False
 FanDancer = 0x0F7
 Corpse = 0x2006
 LootBag = 0
-TypeList = []
 PlayerTypes = [183, 184, 185, 186, 400, 401, 402, 403, 605, 606, 607, 608, 666, 667, 694, 695, 750, 751, 970]
 
 
