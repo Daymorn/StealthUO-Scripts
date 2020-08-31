@@ -21,6 +21,7 @@ def OnDrawObject(_objID):
                 _now = datetime.now()
                 _now = _now.strftime("%m/%d/%Y %H:%M:%S")
                 AddToSystemJournal(f'Player Found: {_name} at {_now}')
+    return
 
 
 def OnClilocSpeech(_param1, _param2, _param3, _message):
