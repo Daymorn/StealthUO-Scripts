@@ -35,8 +35,9 @@ def OnClilocSpeech(_param1, _param2, _param3, _message):
 def LootCorpse(_corpse):
     UseObject(_corpse)
     Wait(1500)
-    if FindTypesArrayEx([0xFFFF], [0xFFFF], [_corpse], True):
-        _lootList = GetFindedList()
+    if FindTypeEx(0xFFFF, 0xFFFF, _corpse, True):
+        _lootList = GetFoundList()
+        Wait(250)
         for _loot in _lootList:
             _tooltipRec = GetTooltipRec(_loot)
             if GetParam(_tooltipRec, 1112857) >= 20 and not ClilocIDExists(_tooltipRec, 1152714) and not\
