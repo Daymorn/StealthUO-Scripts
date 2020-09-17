@@ -501,14 +501,15 @@ def GetExtInfo():
     keys = ('MaxWeight', 'Race', 'StatCap', 'PetsCurrent', 'PetsMax',
             'FireResist', 'ColdResist', 'PoisonResist', 'EnergyResist',
             'Luck', 'DamageMin', 'DamageMax', 'Tithing_points',
-            'Hit_Chance_Incr', 'Swing_Speed_Incr', 'Damage_Incr',
-            'Lower_Reagent_Cost', 'HP_Regen', 'Stam_Regen', 'Mana_Regen',
-            'Reflect_Phys_Damage', 'Enhance_Potions', 'Defense_Chance_Incr',
-            'Spell_Damage_Incr', 'Faster_Cast_Recovery', 'Faster_Casting',
-            'Lower_Mana_Cost', 'Strength_Incr', 'Dex_Incr', 'Int_Incr',
-            'HP_Incr', 'Mana_Incr', 'Max_HP_Incr', 'Max_Stam_Incr',
-            'Max_Mana_Increase')
-    fmt = '<HBH2B4Hh2Hi23H'
+            'ArmorMax', 'fireresistMax', 'coldresistMax',
+            'poisonresistMax', 'energyresistMax', 'DefenseChance',
+            'DefensceChanceMax', 'Hit_Chance_Incr', 'Damage_Incr',
+            'Swing_Speed_Incr', 'Lower_Reagent_Cost', 'Spell_Damage_Incr',
+            'Faster_Cast_Recovery', 'Faster_Casting', 'Lower_Mana_Cost',
+            'HP_Regen', 'Stam_Regen', 'Mana_Regen', 'Reflect_Phys_Damage',
+            'Enhance_Potions', 'Strength_Incr', 'Dex_Incr', 'Int_Incr',
+            'HP_Incr', 'Mana_Incr')
+    fmt = '=HBH2B4Hh2Hi26H'
     data = _get_extended_info()
     if b'' == '':  # py2
         data = bytes(data)
@@ -3013,6 +3014,10 @@ def EquipDressSet():
     return all(res)
 
 
+def DressSavedSet():
+    EquipDressSet()
+
+
 def Count(ObjType):
     FindType(ObjType, Backpack())
     return FindFullQuantity()
@@ -3968,11 +3973,7 @@ def StealthPath():
 
 
 def CurrentScriptPath():
-    import sys
-    try:
-        return sys.argv[1]
-    except IndexError:
-        return sys.modules['__main__'].__file__
+    return __file__
 
 
 _get_stealth_profile_path = _ScriptMethod(306)  # GetStealthProfilePath
@@ -4632,7 +4633,8 @@ def GetMenuItemsEx(MenuCaption):
 
     data = _get_menu_items_ex(MenuCaption)
     result = []
-    offset = 0
+    # count = _struct.unpack_from('H', data, 0)
+    offset = 2
     while offset < len(data):
         model, color = _struct.unpack_from('HH', data, offset)
         offset += 4
@@ -4647,3 +4649,46 @@ def GetMenuItemsEx(MenuCaption):
 
     return result
 
+
+_close_client_gump = _ScriptMethod(342)  # CloseClientGump
+_close_client_gump.argtypes = [_uint]  # ID
+
+def CloseClientGump(ID):
+    _close_client_gump(ID)
+
+
+_get_next_step_z = _ScriptMethod(366)  # GetNextStepZ
+_get_next_step_z.restype = _byte
+_get_next_step_z.argtypes = [_ushort,  # CurrX
+                             _ushort,  # CurrY
+                             _ushort,  # DestX
+                             _ushort,  # DestY
+                             _ubyte,  # WorldNum
+                             _byte]  # CurrZ
+
+def GetNextStepZ(CurrX, CurrY, DestX, DestY, WorldNum, CurrZ):
+    return _get_next_step_z(CurrX, CurrY, DestX, DestY, WorldNum, CurrZ)
+
+
+_client_hide = _ScriptMethod(368)  # ClientHide
+_client_hide.restype = _bool
+_client_hide.argtypes = [_uint]  # ID
+
+def ClientHide(ID):
+    return _client_hide(ID)
+
+
+_get_skill_lock_state = _ScriptMethod(369)  # GetSkillLockState
+_get_skill_lock_state.restype = _byte
+_get_skill_lock_state.argtypes = [_str]  # SkillName
+
+def GetSkillLockState(SkillName):
+    return _get_skill_lock_state(SkillName)
+
+
+_get_stat_lock_state = _ScriptMethod(372)  # GetStatLockState
+_get_stat_lock_state.restype = _byte
+_get_stat_lock_state.argtypes = [_str]  # SkillName
+
+def GetStatLockState(SkillName):
+    _get_stat_lock_state(SkillName)
