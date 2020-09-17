@@ -1,13 +1,13 @@
 from py_stealth import *
+from helpers import *
 
 
 if __name__ == '__main__':
     while True:
-        if FindTypesArrayEx([0xFFFF], [0xFFFF], [0x0], False):
-            _foundList = GetFindedList()
-            _lengthOfList = len(_foundList)
-            print(f'objects found: {_lengthOfList}')
+        _item = RequestTarget()
+        _tooltipRec = GetTooltipRec(_item)
+        if GetParam(_tooltipRec, 1112857) >= 20 and not ClilocIDExists(_tooltipRec, 1152714) and not \
+                ClilocIDExists(_tooltipRec, 1049643):
+            print(f'True')
         else:
-            print('no objects found!')
-
-        Wait(500)
+            print(f'False')
