@@ -35,16 +35,19 @@ def OnClilocSpeech(_param1, _param2, _param3, _message):
 def LootCorpse(_corpse):
     UseObject(_corpse)
     Wait(1500)
-    if FindTypeEx(0xFFFF, 0xFFFF, _corpse, True):
-        _lootList = GetFoundList()
-        Wait(250)
-        for _loot in _lootList:
-            _tooltipRec = GetTooltipRec(_loot)
-            if GetParam(_tooltipRec, 1112857) >= 20 and not ClilocIDExists(_tooltipRec, 1152714) and not\
-                    ClilocIDExists(_tooltipRec, 1049643):
-                AddToSystemJournal(f'Looting Item: {_loot}')
-                MoveItem(_loot, 1, LootBag, 0, 0, 0)
-                InsureItem(_loot)
+    try:
+        if FindTypeEx(0xFFFF, 0xFFFF, _corpse, True):
+            _lootList = GetFoundList()
+            Wait(250)
+            for _loot in _lootList:
+                _tooltipRec = GetTooltipRec(_loot)
+                if GetParam(_tooltipRec, 1112857) >= 20 and not ClilocIDExists(_tooltipRec, 1152714) and not\
+                        ClilocIDExists(_tooltipRec, 1049643):
+                    AddToSystemJournal(f'Looting Item: {_loot}')
+                    MoveItem(_loot, 1, LootBag, 0, 0, 0)
+                    InsureItem(_loot)
+    except Exception:
+        AddToSystemJournal("Caught exception while searching corpse")
     return
 
 
@@ -89,10 +92,13 @@ if __name__ == '__main__':
             Connect()
             Wait(10000)
 
-        Wait(250)
-        if FindTypeEx(FanDancer, 0xFFFF, 0x0, False):
-            _monsters = GetFoundList()
-        Wait(250)
+        try:
+            Wait(250)
+            if FindTypeEx(FanDancer, 0xFFFF, 0x0, False):
+                _monsters = GetFoundList()
+            Wait(250)
+        except Exception:
+            AddToSystemJournal("Caught exception while searching for dancers.")
 
         # entrance 79, 97, 326, 344 - bloodyroom 104, 115, 640, 660
         if (_currentTarget == 0 and len(_monsters) > 0) or (_currentTarget != 0 and not IsObjectExists(_currentTarget)):
@@ -113,18 +119,21 @@ if __name__ == '__main__':
 
         if GetMana(Self()) >= 40:
             UsePrimaryAbility()
-        
-        if FindTypesArrayEx([Corpse], [0xFFFF], [0x0], False):
-            _corpses = GetFindedList()
-            if len(_corpses) > 0:
-                for _corpse in _corpses:
-                    if GetDistance(_corpse) < 3:
-                        LootCorpse(_corpse)
-                        Ignore(_corpse)
-                    else:  # entrance 79, 97, 326, 344 - bloodyroom 104, 115, 640, 660
-                        if 79 <= GetX(_corpse) <= 97 and 326 <= GetY(_corpse) <= 344:
-                            NewMoveXY(GetX(_corpse), GetY(_corpse), True, 0, True)
+
+        try:
+            if FindTypesArrayEx([Corpse], [0xFFFF], [0x0], False):
+                _corpses = GetFindedList()
+                if len(_corpses) > 0:
+                    for _corpse in _corpses:
+                        if GetDistance(_corpse) < 3:
                             LootCorpse(_corpse)
                             Ignore(_corpse)
+                        else:  # entrance 79, 97, 326, 344 - bloodyroom 104, 115, 640, 660
+                            if 79 <= GetX(_corpse) <= 97 and 326 <= GetY(_corpse) <= 344:
+                                NewMoveXY(GetX(_corpse), GetY(_corpse), True, 0, True)
+                                LootCorpse(_corpse)
+                                Ignore(_corpse)
+        except Exception:
+            AddToSystemJournal("Caught exception trying to find corpses.")
 
         Wait(1000)

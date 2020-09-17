@@ -4,10 +4,12 @@ from helpers import *
 
 if __name__ == '__main__':
     while True:
-        _item = RequestTarget()
-        _tooltipRec = GetTooltipRec(_item)
-        if GetParam(_tooltipRec, 1112857) >= 20 and not ClilocIDExists(_tooltipRec, 1152714) and not \
-                ClilocIDExists(_tooltipRec, 1049643):
-            print(f'True')
-        else:
-            print(f'False')
+        try:
+            if FindTypeEx(0xFFFF, 0xFFFF, 0x0, True):
+                _itemList = GetFoundList()
+                print(f'{len(_itemList)} items found')
+            else:
+                print(f'none found')
+        except:
+            print(f'something went wrong')
+        Wait(250)
