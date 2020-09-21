@@ -1,6 +1,6 @@
 from py_stealth import ClientRequestObjectTarget, ClientTargetResponsePresent
 from py_stealth import ClientTargetResponse, FindTypesArrayEx, GetFindedList
-from py_stealth import AddToSystemJournal, Wait
+from py_stealth import AddToSystemJournal, Wait, GetDistance
 import time
 
 
@@ -32,7 +32,12 @@ def NewFind(_types, _colors, _container, _subs):
         try:
             Wait(250)
             if FindTypesArrayEx(_types, _colors, _container, _subs):
-                return GetFindedList()
+                _foundList = GetFindedList()
+                _distanceList = []
+                for _found in _foundList:
+                    _distanceList.append(GetDistance(_found))
+                _orderedList = [_foundList[_i] for _i in _distanceList]
+                return _orderedList
             else:
                 return []
         except Exception:
