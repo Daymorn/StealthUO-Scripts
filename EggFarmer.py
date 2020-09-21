@@ -1,5 +1,5 @@
 from py_stealth import *
-from helpers import RequestTarget
+from helpers import *
 from datetime import datetime
 
 SnakeTypes = [0x15, 0x34, 0x5A, 0x5B, 0x5C, 0x5D]
@@ -40,6 +40,8 @@ Areas = [
 ]
 Path = Areas[0]
 CurrentSpot = 0
+Bombs = []
+Cures = []
 
 
 def MoveNextSpot():
@@ -56,49 +58,123 @@ def MoveNextSpot():
     return
 
 
+def OnClilocSpeech(_param1, _param2, _param3, _message):
+    global Cures
+    if 'nauseous' in _message:
+        while IsPoisoned(Self()):
+            if len(Cures) > 0:
+                UseObject(Cures[0])
+            else:
+                AddToSystemJournal("No cure potions found and I'm poisoned!")
+                break
+    return
+
+
 if __name__ == '__main__':
     SetFindDistance = 5
     SetFindVertical = 5
-    _flutes = []
-    _snakes = []
-    _eggs = []
-    _bombs = []
-    _cures = []
-    _nests = []
+    _flutesFound = []
+    _snakesFound = []
+    _eggsFound = []
+    _nestsFound = []
     _currentSpot = 0
     MoveNextSpot()
+
+    SetEventProc('evclilocspeech', OnClilocSpeech)
+
+    Bombs = NewFind([BombTypes], [0xFFFF], [Backpack()], True)
+    Cures = NewFind([CureTypes], [0xFFFF], [Backpack()], True)
+
+    if len(Cures) == 0:
+        AddToSystemJournal("*Warning* You have no cures!")
+
+    if len(Bombs) == 0:
+        AddToSystemJournal("*Warning* You have no smoke bombs!")
+
+    while not Hidden():
+        UseSkill("Hiding")
+        Wait(1500)
 
     while True:
         while not Connected():
             Connect()
             Wait(10000)
 
-        if FindTypesArrayEx(FluteTypes, [0xFFFF], [Backpack()], False):
-            _flutes = GetFindedList()
-        else:
+        while not Hidden():
+            if len(Bombs) > 0:
+                UseObject(Bombs[0])
+                AddToSystemJournal("Not hidden, using smoke bomb...")
+                Wait(1250)
+
+        _flutesFound = NewFind([FluteTypes], [0xFFFF], [Backpack()], False)
+        if len(_flutesFound) == 0:
             AddToSystemJournal('Out of flutes, quitting...')
             exit()
 
-        if FindTypesArrayEx([EggTypes], [0xFFFF], [0x0], False):
-            _eggs = GetFindedList()
-            for _egg in _eggs:
+        _eggsFound = NewFind([EggTypes], [0xFFFF], [0x0], False)
+        if len(_eggsFound) > 0:
+            for _egg in _eggsFound:
                 while GetX(Self()) != GetX(_egg) and GetY(Self()) != GetY(_egg):
                     NewMoveXY(GetX(_egg), GetY(_egg), False, 0, False)
                     Wait(250)
                 MoveItem(_egg, 1, Backpack(), 0, 0, 0)
                 Ignore(_egg)
 
-        if FindTypesArrayEx(SnakeTypes, [0xFFFF], [0x0], False):
-            _snakes = GetFindedList()
-
-        if FindTypesArrayEx(NestTypes, [0xFFFF], [0x0], False):
-            _nests = GetFindedList()
-
-
-
-
-
-
-
-        if len(_snakes) == 0 or len(_nests) == 0:
+        _nestsFound = NewFind([NestTypes], [0xFFFF], [0x0], False)
+        if len(_nestsFound) == 0:
+            AddToSystemJournal("No nests found, moving to next spot...")
             MoveNextSpot()
+            continue
+
+        _snakesFound = NewFind([SnakeTypes], [0xFFFF], [0x0], False)
+        if len(_snakesFound) == 0:
+            AddToSystemJournal("No snakes found, moving to next spot...")
+            MoveNextSpot()
+            continue
+
+        if (GetDistance(_nestsFound[0]) > 9) or (GetDistance(_snakesFound[0]) > 9):
+            AddToSystemJournal("Snakes or nests were too far, moving to next spot...")
+            MoveNextSpot()
+            continue
+
+        for _snake in _snakesFound:
+
+            CancelWaitTarget()
+            CancelTarget()
+            AddToSystemJournal("Trying to persuede snakes...")
+
+            while True:
+                _stopwatch = datetime.now()
+                UseObject(_flutesFound[0])
+                if not WaitJournalLine(_stopwatch, "You must wait a moment for it to recharge.", 750):
+                    break
+                AddToSystemJournal("Flute recharging...")
+                Wait(1500)
+
+            _stopwatch = datetime.now()
+            WaitTargetObject(_snake)
+            Wait(500)
+            _nestsFound = NewFind([NestTypes], [0xFFFF], [0x0], False)
+            Wait(250)
+            WaitTargetObject(_nestsFound[0])
+
+            if WaitJournalLine(_stopwatch, "Target cannot be seen.", 2000):
+                AddToSystemJournal("Something couldn't be seen, trying another snake...")
+                continue
+            elif WaitJournalLine(_stopwatch, "That creature is too far away.", 2000):
+                AddToSystemJournal("Snake was too far wawy, checking for another...")
+                continue
+            elif WaitJournalLine(_stopwatch, "You don't seem to be able to persuade that to move.", 2000):
+                AddToSystemJournal("Snake wasn't persuadable, checking for another...")
+                continue
+            elif WaitJournalLine(_stopwatch, "That is not a snake or a serpent.", 2000):
+                AddToSystemJournal("Target wasn't a snake, trying another...")
+                continue
+            elif WaitJournalLine(_stopwatch, "Someone else is already taming this.", 2000):
+                AddToSystemJournal("Snake hasn't finished digging, trying another...")
+                continue
+            elif WaitJournalLine(_stopwatch, "The animal walks where it was instructed to.", 2000):
+                AddToSystemJournal("Successfully persuaded snake to nest.")
+                continue
+
+            Wait(10000)
