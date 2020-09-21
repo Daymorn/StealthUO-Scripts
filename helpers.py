@@ -1,5 +1,6 @@
 from py_stealth import ClientRequestObjectTarget, ClientTargetResponsePresent
-from py_stealth import ClientTargetResponse
+from py_stealth import ClientTargetResponse, FindTypesArrayEx, GetFindedList
+from py_stealth import AddToSystemJournal, Wait
 import time
 
 
@@ -24,3 +25,16 @@ def ClilocIDExists(_tooltipRec, _clilocID):
         if _tooltip['Cliloc_ID'] == _clilocID:
             return True
     return False
+
+
+def NewFind(_types, _colors, _container, _subs):
+    while True:
+        try:
+            Wait(250)
+            if FindTypesArrayEx(_types, _colors, _container, _subs):
+                return GetFindedList()
+            else:
+                return []
+        except Exception:
+            AddToSystemJournal("Exception caught during find.")
+            Wait(250)
