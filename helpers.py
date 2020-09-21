@@ -28,16 +28,20 @@ def ClilocIDExists(_tooltipRec, _clilocID):
 
 
 def NewFind(_types, _colors, _container, _subs):
+    _foundlist = []
     while True:
         try:
             Wait(250)
             if FindTypesArrayEx(_types, _colors, _container, _subs):
                 _foundList = GetFindedList()
                 _distanceList = []
-                for _found in _foundList:
-                    _distanceList.append(GetDistance(_found))
-                _orderedList = [_foundList[_i] for _i in _distanceList]
-                return _orderedList
+                if len(_foundlist) > 1:
+                    for _found in _foundList:
+                        _distanceList.append(GetDistance(_found))
+                    _orderedList = [_foundList[_i] for _i in _distanceList]
+                    return _orderedList
+                else:
+                    return _foundList
             else:
                 return []
         except Exception:
