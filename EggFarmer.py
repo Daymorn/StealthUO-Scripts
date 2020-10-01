@@ -59,7 +59,6 @@ def MoveNextSpot():
 
 
 def OnClilocSpeech(_param1, _param2, _param3, _message):
-    global Cures
     if 'nauseous' in _message:
         while IsPoisoned(Self()):
             if len(Cures) > 0:
@@ -71,8 +70,8 @@ def OnClilocSpeech(_param1, _param2, _param3, _message):
 
 
 if __name__ == '__main__':
-    SetFindDistance = 5
-    SetFindVertical = 5
+    SetFindDistance(8)
+    SetFindVertical(8)
     _flutesFound = []
     _snakesFound = []
     _eggsFound = []
@@ -132,7 +131,7 @@ if __name__ == '__main__':
             MoveNextSpot()
             continue
 
-        if (GetDistance(_nestsFound[0]) > 9) or (GetDistance(_snakesFound[0]) > 9):
+        if (GetDistance(_nestsFound[0]) > 8) or (GetDistance(_snakesFound[0]) > 8):
             AddToSystemJournal("Snakes or nests were too far, moving to next spot...")
             MoveNextSpot()
             continue
