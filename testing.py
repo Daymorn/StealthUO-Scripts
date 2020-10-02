@@ -4,12 +4,15 @@ from helpers import *
 
 if __name__ == '__main__':
     while True:
-        try:
-            if FindTypeEx(0xFFFF, 0xFFFF, 0x0, True):
-                _itemList = GetFoundList()
-                print(f'{len(_itemList)} items found')
-            else:
-                print(f'none found')
-        except:
-            print(f'something went wrong')
         Wait(250)
+        RequestContextMenu(Self())
+        _i = 0
+        _insure = False
+        for _menuItem in GetContextMenu().splitlines():
+            if "Toggle Item Insurance" in _menuItem:
+                SetContextMenuHook(Self(), _i)
+                _insure = True
+            else:
+                _i += 1
+
+        Wait(25000)

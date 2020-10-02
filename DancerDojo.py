@@ -52,11 +52,17 @@ def LootCorpse(_corpse):
 def InsureItem(_item):
     Wait(250)
     RequestContextMenu(Self())
-    SetContextMenuHook(Self(), 9)
-    Wait(250)
-    WaitTargetObject(_item)
-    Wait(250)
-    CancelMenu()
+    _i = 0
+    for _menuItem in GetContextMenu().splitlines():
+        if "Toggle Item Insurance" in _menuItem:
+            SetContextMenuHook(Self(), _i)
+            Wait(250)
+            WaitTargetObject(_item)
+            Wait(250)
+            CancelMenu()
+        else:
+            _i += 1
+            AddToSystemJournal("Couldn't find insure menu item.")
     CancelAllMenuHooks()
     CancelTarget()
     return
