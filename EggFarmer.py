@@ -47,13 +47,23 @@ Areas = [
         [772, 736], [761, 738], [749, 735], [740, 740], [749, 750]
     ]
 ]
-Path = Areas[0]
+Path = Areas[2]
 CurrentSpot = 0
 Bombs = []
 Cures = []
 
+def EggSearch():
+    _eggsFound = NewFind(EggTypes, [0xFFFF], [0x0], False)
+    if len(_eggsFound) > 0:
+        for _egg in _eggsFound:
+            while GetX(Self()) != GetX(_egg) and GetY(Self()) != GetY(_egg):
+                NewMoveXY(GetX(_egg), GetY(_egg), False, 0, False)
+                Wait(250)
+            MoveItem(_egg, 1, Backpack(), 0, 0, 0)
+            Ignore(_egg)
 
 def MoveNextSpot():
+    EggSearch()
     global CurrentSpot
     AddToSystemJournal("Moving to next spot...")
     while GetX(Self()) != Path[CurrentSpot][0] or\
@@ -67,7 +77,6 @@ def MoveNextSpot():
     if CurrentSpot == len(Path):
         CurrentSpot = 0
     return
-
 
 def OnClilocSpeech(_param1, _param2, _param3, _message):
     if 'nauseous' in _message:
@@ -91,9 +100,8 @@ if __name__ == '__main__':
     MoveNextSpot()
 
     SetEventProc('evclilocspeech', OnClilocSpeech)
-
-    Bombs = NewFind([BombTypes], [0xFFFF], [Backpack()], True)
-    Cures = NewFind([CureTypes], [0xFFFF], [Backpack()], True)
+    Bombs = NewFind(BombTypes, [0xFFFF], [Backpack()], True)
+    Cures = NewFind(CureTypes, [0xFFFF], [Backpack()], True)
 
     if len(Cures) == 0:
         AddToSystemJournal("*Warning* You have no cures!")
@@ -116,27 +124,20 @@ if __name__ == '__main__':
                 AddToSystemJournal("Not hidden, using smoke bomb...")
                 Wait(1250)
 
-        _flutesFound = NewFind([FluteTypes], [0xFFFF], [Backpack()], False)
+        _flutesFound = NewFind(FluteTypes, [0xFFFF], [Backpack()], False)
         if len(_flutesFound) == 0:
             AddToSystemJournal('Out of flutes, quitting...')
             exit()
 
-        _eggsFound = NewFind([EggTypes], [0xFFFF], [0x0], False)
-        if len(_eggsFound) > 0:
-            for _egg in _eggsFound:
-                while GetX(Self()) != GetX(_egg) and GetY(Self()) != GetY(_egg):
-                    NewMoveXY(GetX(_egg), GetY(_egg), False, 0, False)
-                    Wait(250)
-                MoveItem(_egg, 1, Backpack(), 0, 0, 0)
-                Ignore(_egg)
+        EggSearch()
 
-        _nestsFound = NewFind([NestTypes], [0xFFFF], [0x0], False)
+        _nestsFound = NewFind(NestTypes, [0xFFFF], [0x0], False)
         if len(_nestsFound) == 0:
             AddToSystemJournal("No nests found, moving to next spot...")
             MoveNextSpot()
             continue
 
-        _snakesFound = NewFind([SnakeTypes], [0xFFFF], [0x0], False)
+        _snakesFound = NewFind(SnakeTypes, [0xFFFF], [0x0], False)
         if len(_snakesFound) == 0:
             AddToSystemJournal("No snakes found, moving to next spot...")
             MoveNextSpot()
@@ -167,7 +168,11 @@ if __name__ == '__main__':
             _stopwatch = datetime.now()
             WaitTargetObject(_snake)
             Wait(500)
-            _nestsFound = NewFind([NestTypes], [0xFFFF], [0x0], False)
+            _nestsFound = NewFind(NestTypes, [0xFFFF], [0x0], False)
+            if len(_nestsFound) == 0:
+                AddToSystemJournal("No nests found, moving to next spot...")
+                MoveNextSpot()
+                continue
             Wait(250)
             WaitTargetObject(_nestsFound[0])
 
